@@ -1,0 +1,107 @@
+version: '3'
+services:
+  db:
+    restart: always
+    image: postgres:${POSTGRES_TAG}
+    shm_size: 256mb
+    networks:
+      - internal_network
+    healthcheck:
+      test: ['CMD', 'pg_isready', '-U', 'postgres']
+    volumes:
+      - ./postgres16:/var/lib/postgresql/data
+    environment:
+      - 'POSTGRES_HOST_AUTH_METHOD=trust'
+
+  valkey:
+    restart: always
+    image: valkey/valkey:${VALKEY_TAG}
+    networks:
+      - internal_network
+    healthcheck:
+      test: ['CMD', 'valkey-cli', 'ping']
+    volumes:
+      - ./valkey:/data
+
+  opensearch:
+    restart: always
+    image: opensearchproject/opensearch:latest
+    environment:
+      - discovery.type=single-node
+      - "DISABLE_SECURITY_PLUGIN=true"
+      - "OPENSEARCH_JAVA_OPTS=-Xms512m -Xmx512m"
+      - OPENSEARCH_INITIAL_ADMIN_PASSWORD=${OPENSEARCH_INITIAL_ADMIN_PASSWORD}
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+      nofile:
+        soft: 65536
+        hard: 65536
+    healthcheck:
+        test: ["CMD-SHELL", "curl --silent --fail localhost:9200/_cluster/health || exit 1"]
+    volumes:
+      - ./opensearch:/usr/share/opensearch/data
+    ports:
+      - '127.0.0.1:9200:9200'
+    networks:
+      - internal_network
+      - external_network
+
+  web:
+    image: ghcr.io/mastodon/mastodon:${MASTODON_TAG}
+    restart: always
+    env_file: .env.production
+    command: bundle exec puma -C config/puma.rb
+    networks:
+      - external_network
+      - internal_network
+    healthcheck:
+      # prettier-ignore
+      test: ['CMD-SHELL', 'wget -q --spider --proxy=off localhost:3000/health || exit 1']
+    ports:
+      - '127.0.0.1:3000:3000'
+    depends_on:
+      - db
+      - valkey
+      - opensearch
+    volumes:
+      - ./public/system:/mastodon/public/system
+
+  streaming:
+    image: ghcr.io/mastodon/mastodon:${MASTODON_TAG}
+    restart: always
+    env_file: .env.production
+    command: node ./streaming
+    networks:
+      - external_network
+      - internal_network
+    healthcheck:
+      # prettier-ignore
+      test: ['CMD-SHELL', 'wget -q --spider --proxy=off localhost:4000/api/v1/streaming/health || exit 1']
+    ports:
+      - '127.0.0.1:4000:4000'
+    depends_on:
+      - db
+      - valkey
+
+  sidekiq:
+    image: ghcr.io/mastodon/mastodon:${MASTODON_TAG}
+    restart: always
+    env_file: .env.production
+    command: bundle exec sidekiq
+    depends_on:
+      - db
+      - valkey
+    networks:
+      - external_network
+      - internal_network
+    volumes:
+      - ./public/system:/mastodon/public/system
+    healthcheck:
+      test: ['CMD-SHELL', "ps aux | grep '[s]idekiq\ 6' || false"]
+
+networks:
+  external_network:
+  internal_network:
+    internal: true
