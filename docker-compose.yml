@@ -25,7 +25,7 @@ services:
 
   opensearch:
     restart: always
-    image: opensearchproject/opensearch:latest
+    image: opensearchproject/opensearch:${OPENSEARCH_TAG}
     environment:
       - discovery.type=single-node
       - "DISABLE_SECURITY_PLUGIN=true"
@@ -44,6 +44,7 @@ services:
       - ./opensearch:/usr/share/opensearch/data
     ports:
       - '127.0.0.1:9200:9200'
+      - '[::1]:9200:9200'
     networks:
       - internal_network
       - external_network
@@ -61,6 +62,7 @@ services:
       test: ['CMD-SHELL', 'wget -q --spider --proxy=off localhost:3000/health || exit 1']
     ports:
       - '127.0.0.1:3000:3000'
+      - '[::1]:3000:3000'
     depends_on:
       - db
       - valkey
@@ -81,6 +83,7 @@ services:
       test: ['CMD-SHELL', 'wget -q --spider --proxy=off localhost:4000/api/v1/streaming/health || exit 1']
     ports:
       - '127.0.0.1:4000:4000'
+      - '[::1]:4000:4000'
     depends_on:
       - db
       - valkey
