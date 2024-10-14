@@ -12,6 +12,9 @@ I need to add a bit of documentation around the setup process, but I wanted to g
 ## Files
 
 .env - Environment variables for the Docker Compose setup; this is where I update the versions of things so I don't have to type them more than once.
+
 .env.production - Environment variables for the Mastodon setup; this is where I put the configuration for the Mastodon instance.
+
 docker-compose.yml - The Docker Compose file that sets up the Mastodon instance.
+
 nginx.domain.name - The nginx configuration file that sets up the reverse proxy for the Mastodon instance.
