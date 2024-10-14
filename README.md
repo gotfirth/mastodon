@@ -1,4 +1,14 @@
 # mastodon
+
+## Versions
+
+Valkey: 8
+Postgres: 16
+Mastodon: v4.3.0
+OpenSearch: 2
+
+## Description
+
 This is my configuration for a Mastodon setup via Docker Compose that uses Valkey and OpenSearch.
 
 I run a few small (single digit users) instances of Mastodon for myself and friends. I wanted to see what it would take to move away from Redis and Elasticsearch. As I was looking for samples and examples, I realized there weren't many of them available so I decided to share my configuration in case anyone else finds it helpful.
