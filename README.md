@@ -6,7 +6,7 @@ Valkey: 8
 
 Postgres: 16
 
-Mastodon: v4.3.0
+Mastodon: v4.3.1
 
 OpenSearch: 2
 
