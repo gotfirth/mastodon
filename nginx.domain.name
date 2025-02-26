@@ -1,5 +1,5 @@
 server {
-        listen 446 ssl;
+        listen 443 ssl;
         listen [::]:443 ssl;
         root /mnt/none;
         index index.html index.htm;
@@ -15,19 +15,17 @@ server {
         ssl_prefer_server_ciphers On;
         ssl_protocols TLSv1.2 TLSv1.3;
 
-
         absolute_redirect off;
         server_name_in_redirect off;
 
         error_page 404 /404.html;
         error_page 410 /410.html;
 
-
         location / {
             proxy_set_header Host $host;
             proxy_set_header X-Forwarded-Proto https;
             proxy_set_header X-Real-IP $remote_addr;
-        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+            proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
 
             proxy_pass http://127.0.0.1:3000;
         }
@@ -36,7 +34,7 @@ server {
             proxy_set_header Host $host;
             proxy_set_header X-Forwarded-Proto https;
             proxy_set_header X-Real-IP $remote_addr;
-        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+            proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
 
             proxy_pass http://127.0.0.1:4000;
 
