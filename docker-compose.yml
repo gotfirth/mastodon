@@ -1,21 +1,20 @@
-version: '3'
 services:
   db:
     restart: always
-    image: postgres:${POSTGRES_TAG}
+    image: public.ecr.aws/docker/library/postgres:${POSTGRES_TAG}
     shm_size: 256mb
     networks:
       - internal_network
     healthcheck:
       test: ['CMD', 'pg_isready', '-U', 'postgres']
     volumes:
-      - ./postgres16:/var/lib/postgresql/data
+      - ./postgres18:/var/lib/postgresql
     environment:
       - 'POSTGRES_HOST_AUTH_METHOD=trust'
 
   valkey:
     restart: always
-    image: valkey/valkey:${VALKEY_TAG}
+    image: ghcr.io/valkey-io/valkey:${VALKEY_TAG}
     networks:
       - internal_network
     healthcheck:
@@ -25,7 +24,7 @@ services:
 
   opensearch:
     restart: always
-    image: opensearchproject/opensearch:${OPENSEARCH_TAG}
+    image: public.ecr.aws/opensearchproject/opensearch:${OPENSEARCH_TAG}
     environment:
       - discovery.type=single-node
       - "DISABLE_SECURITY_PLUGIN=true"
@@ -43,7 +42,7 @@ services:
     volumes:
       - ./opensearch:/usr/share/opensearch/data
     ports:
-      - '127.0.0.1:9200:9200'
+      - '127.0.0.1:9201:9200'
     networks:
       - internal_network
       - external_network
@@ -60,7 +59,7 @@ services:
       # prettier-ignore
       test: ['CMD-SHELL', 'wget -q --spider --proxy=off localhost:3000/health || exit 1']
     ports:
-      - '127.0.0.1:3000:3000'
+      - '127.0.0.1:3001:3000'
     depends_on:
       - db
       - valkey
@@ -80,7 +79,7 @@ services:
       # prettier-ignore
       test: ['CMD-SHELL', 'wget -q --spider --proxy=off localhost:4000/api/v1/streaming/health || exit 1']
     ports:
-      - '127.0.0.1:4000:4000'
+      - '127.0.0.1:4001:4000'
     depends_on:
       - db
       - valkey
@@ -99,7 +98,7 @@ services:
     volumes:
       - ./public/system:/mastodon/public/system
     healthcheck:
-      test: ['CMD-SHELL', "ps aux | grep '[s]idekiq\ 6' || false"]
+      test: ['CMD-SHELL', "ps aux | grep '[s]idekiq\ 7' || false"]
 
 networks:
   external_network:
