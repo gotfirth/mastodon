@@ -2,11 +2,11 @@
 
 ## Versions
 
-Valkey: 8
+Valkey: 9
 
 Postgres: 17
 
-Mastodon: v4.3.4
+Mastodon: v4.5.1
 
 OpenSearch: 2
 
